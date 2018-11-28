@@ -1,0 +1,19 @@
+Videos related to week 38
+- https://www.khanacademy.org/economics-finance-domain/core-finance/stock-and-bonds/modal/v/introduction-to-bonds
+- https://www.khanacademy.org/economics-finance-domain/core-finance/interest-tutorial/present-value/v/time-value-of-money (and maybe also the remaining videos of discounted cash flows)
+
+Videos related to week 39
+-https://www.khanacademy.org/economics-finance-domain/core-finance/stock-and-bonds/ VIDEOS UNDER BONDS INCLUDING YIELD CURVE (Some of them cover the same things)
+
+About negative interest rates
+- https://www.bloomberg.com/graphics/2016-central-banks/#1
+
+Specification of textbook readings: Week 38
+- Chapter 2 until 2.2.3
+- Chapter 9 gives a continous time version of yields, duration etc. Read the slides for week 38+39 for the discrete time version which we will be using.
+
+Readings for week 39
+- Browse through Chapter 9 until Dynamic Hedging. But focus on reading and applying material from slides.
+
+
+
