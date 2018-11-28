@@ -1,37 +1,50 @@
-%% Getting the NS model parameters
+%% Getting the Yield Curve
 clear 
-% Prices from Sep 27 (or earlier if no price for Sep 27)
-Price = [171.14; 111.00; 106.85; 109.00; 111.62; 106.81; 142.40; 101.62; 101.92];
-Coupon = [4.5; 1.75; 0.1; 1.5; 3; 4; 7; 0.25; 0.5];
-MatYear = [2039; 2025; 2023; 2023; 2021; 2019; 2024; 2020; 2027];
+% Price = [108.485; 110.41; 171.25; 104.613; 142.340;110.980;101.702;111.680;101.720;106.998];
+% Coupon = [1.5; 3; 4.5; 4; 7; 0.1; 0.25; 1.75;0.5;0.1];
+% MatYear = [2023; 2021; 2039; 2019; 2024 ;2030; 2020;2025;2027;2023];
+
+Price = [171.25; 111.65;  109.00; 111.62; 104.54; 142.40; 101.62; 101.92];
+Coupon = [4.5; 1.75;  1.5; 3; 4; 7; 0.25; 0.5];
+MatYear = [2039; 2025;  2023; 2021; 2019; 2024; 2020; 2027];
 for i = 1:length(Price)
     Maturity(i) = datenum(MatYear(i),11,15);
 end
+clearvars TimeOfPayments TimeToPayments Payment
+TimeOfPayments = zeros(length(Price), length((year(today) +1):year(Maturity(1))));
+TimeToPayments = zeros(length(Price), length((year(today) +1):year(Maturity(1))));
+CashFlowsDirty = zeros(length(Price), length((year(today) +1):year(Maturity(1))));
+DirtyPrice = zeros(length(Price), 1);
+PVs = zeros(length(Price), 1);
 for j = 1:length(Price)
-    clearvars TimeOfPayments TimeToPayments Payment
-    for i = year(today):year(Maturity(j))
-        TimeOfPayments(i-year(today)+1,1) = datenum(i,11,28);
-        TimeToPayments(i-year(today)+1,1) = yearfrac(today,datenum(i,11,1),0);
-        Payment(i-year(today)+1,1) = Coupon(j);
+    for i = (year(today) +1):year(Maturity(j))
+        TimeOfPayments(j, i-year(today)+1) = datenum(i,11,15);
+        TimeToPayments(j, i-year(today)+1) = yearfrac(today,datenum(i,11,1),0);
+        CashFlowsDirty(j, i-year(today)+1) = Coupon(j);
     end
-    Payment(end,1) = 100+Payment(end,1);
-    AccruedInterest = yearfrac(datenum(year(today)-1,11,15),datenum(2018,9,21),0)*Coupon(j);
+    CashFlowsDirty(j, year(Maturity(j)) - year(today) +1 ) = 100+Coupon(j, end);
+    AccruedInterest = yearfrac(datenum(year(today),11,15),today,0)*Coupon(j);
     DirtyPrice(j) = AccruedInterest + Price(j);
-    Yield(j) = cfyield(Payment',TimeOfPayments',DirtyPrice(j),today); % Check with programming yourself using fzero.
-    CalcPV(Yield(j),TimeToPayments,Payment)
-    fun = @(x) CalcPV(x,TimeToPayments,Payment)-DirtyPrice(j);
-    YieldProgrammed(j) = fzero(fun,0);
+    CashFlowsDirty(j, 1) =  - DirtyPrice(j);
+    
+    end_ = year(Maturity(j)) - year(today) + 1;
+    Yield(j) = cfyield(CashFlowsDirty(j,2:end_),TimeOfPayments(j, 2:end_),DirtyPrice(j),today); % Check with programming yourself using fzero.
+%     PVs(j, 1) = CalcPV(Yield(j), TimeToPayments(j, 2:end), CashFlowsDirty(j,2:end));
+%     fun = @(x) CalcPV(x,TimeToPayments,CashFlowsDirty)-DirtyPrice(j);
+%     YieldProgrammed(j) = fzero(fun,0);
 end
-x = yearfrac(datenum(2018,9,18), Maturity);
-y = Yield;
+
+
+x = yearfrac(datenum(today), Maturity);
+Yield = Yield;
 [x, order] = sort(x);
-y = y(order)*100;
-par = nelsonfit(x,y);
-p = nelsonfun(0:0.25:30,par);
+Yield = Yield(order)*100;
+par = nelsonfit(x,Yield);
+NSRates = nelsonfun(x,par);
 figure
 set(gcf,'Color','w')
-plot(x,y,'-rs'); hold on
-plot(0:0.25:30,p,'-g' )
+plot(x,Yield,'-rs'); hold on
+plot(x,NSRates,'-g' )
 title('Nelson-Siegel approximation: example')
 xlabel('Maturity, years')
 legend('DK yield curve (as of Sep 2018)', ...
@@ -46,26 +59,66 @@ legend(gca,'boxoff')
 
 %%
 
+r_dur = NSRates/100;
 
-
-FaceValue = Price;
-couponsToMaturity = Coupon;
-cashFlowsDirty = zeros(length(Price), length(couponsToMaturity));
-for i = 1:length(FaceValue)
-    AccruedInterest = yearfrac(datenum(year(today)-1,11,15),datenum(2018,9,21),0)*Coupon(i);
-    dirtyPrice(i) = AccruedInterest + Price(i);
-    cashFlowsDirty(i,1) = - dirtyPrice(i);
-  for j = 1:couponsToMaturity(i)
-    cashFlowsDirty(i,j+1) = Coupon(i);   
-    if (j == couponsToMaturity(i))
-      cashFlowsDirty(i,j+1) = cashFlowsDirty(i,j+1) + FaceValue(i)  ;
-    end
-  end
+duration = zeros(length(r_dur), 1);
+convexity = zeros(length(r_dur), 1);
+for i=1:length(Yield)
+   [duration(i, 1), convexity(i, 1)] = duration_conv(DirtyPrice(i),...
+       CashFlowsDirty(i,2:end), TimeToPayments(i, 2:end), r_dur(i));
 end
-%%
 
-rates = nelsonfun(x,par);
-for i=1:length(rates)
-   [duration, convexity] = duration_conv(Price(1), Payment', TimeToPayments', rates(i));
-   display(duration)
+%% Choosing 3 bonds with duration 10
+
+
+
+A = [-1     0     0
+     0     -1     0
+     0     0     -1];
+ 
+B = [-0.1
+     -0.1
+     -0.1];
+
+
+Aeq = [duration(1:3)'
+        1     1     1];
+
+
+Beq = [10
+        1];
+
+f = [0.5 -4 1];
+
+optimal_weights = linprog(f, A, B, Aeq, Beq);
+
+portfolio_p = optimal_weights' * Price(1:3);
+portfolio_c = optimal_weights' * convexity(1:3);
+portfolio_d = optimal_weights' * duration(1:3);
+
+delta_r = 0.01;
+percent_change = - portfolio_d * delta_r + 0.5 * portfolio_c * (delta_r)^2;
+price_change = portfolio_p * percent_change;
+
+%% Plotting the curve change plot advanced method!!!
+
+yields = 0:0.01:1;
+prices = zeros(length(0:0.1:1), 1);
+percent_change_list = zeros(length(0:0.1:1), 1);
+for i = 2:length(yields)-1
+    delta_r = yields(i) - yields(i-1);
+    percent_change(i) = - portfolio_d * delta_r + 0.5 * portfolio_c * (delta_r)^2;
+    prices(i) = portfolio_p * percent_change(i);
 end
+
+plot(prices)
+
+
+
+
+
+
+
+
+
+

@@ -38,6 +38,15 @@ Corr = corr([daily_returns]);
 VarCov = cov([daily_returns]);
 heatmap(Corr)
 
-%%
+%% Calculating Kurtosis, Skewness, Autocorrelation
+
+for i=1:length(stock_list)
+   X = daily_returns(:, i);
+   Variance(i) = mean((X - mean(X)).^2);
+   Kurtosis(i) = mean(((X - mean(X))/std(X)).^4);
+   Skewness(i) = mean(((X - mean(X))/std(X)).^3);
+end
+
+
 
 
