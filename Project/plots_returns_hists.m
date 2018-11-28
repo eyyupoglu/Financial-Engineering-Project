@@ -45,6 +45,7 @@ for i=1:length(stock_list)
    Variance(i) = mean((X - mean(X)).^2);
    Kurtosis(i) = mean(((X - mean(X))/std(X)).^4);
    Skewness(i) = mean(((X - mean(X))/std(X)).^3);
+   Autocorrs(i) = mean(autocorr(X));
 end
 
 
