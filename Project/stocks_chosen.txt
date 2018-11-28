@@ -1,0 +1,12 @@
+Coca cola : KO			Beverages
+Microsoft : MSFT		Software
+Exxon mobile : XOM		Oil, Gas & Consumable Fuels
+Mcdo : MCD			Hotels, Restaurants & Leisure
+Kellog's : K			Food product
+Walmart : WMT			Food & Staples Retailing
+General Electric : GE		Industrial Conglomerates
+General Motors : GM		Automobiles
+Amazon : AMZN			Internet & Direct Marketing Retail
+JPmorgen : JPM			Financials
+Vulcan Material : VMC		Construction Materials
+PerkinELmer : 	PKI		Health Care Equipment & Supplies
