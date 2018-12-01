@@ -159,10 +159,9 @@ end
 hold off
 scatter(new_StDvAn,new_AvAnRet,'r');
 %}
-%% Plotting
+%% Plotting Portfolio Performance
 
-
-
+%{
 date_span=length(DailyReturns(:,1))+1;
 monney=zeros(date_span,8);
 monney(1,:)=100;
@@ -177,7 +176,6 @@ for j=1:8
     hold on
 end
 legend('GMV SS','Borr Tan', 'Lend Tan','GMV no SS','Max Return','Equal weight','GMV SS 3 assets','Equal weights 3 assets');
+%}
 
-%hold off
-%plot(dates,monney(:,7));
 
