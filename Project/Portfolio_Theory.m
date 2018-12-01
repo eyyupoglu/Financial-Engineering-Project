@@ -1,14 +1,15 @@
 %% Data Download
 close all
-clear
 
-        %%% Choose one of the two lines, and put the other one in comment.
+        %%% Choose one of the two lines to choose which data you want to
+        %%% download and put the other one in comment.
         %%% The first is the Portfolio Theory data, and the second is the
         %%% Portfolio Performance Data
         
         %%%All the plots are in paragraph comment, just remove it to plot
         %%%what you want to see
 
+clear
 %stock = hist_stock_data('01012010','01012018','KO','MCD','PKI','MSFT','EBAY','XOM','K','WMT','GE','F','JPM','VMC');
 stock = hist_stock_data('01012018','27112018','KO','MCD','PKI','MSFT','EBAY','XOM','K','WMT','GE','F','JPM','VMC');
 stock_list = ["KO",'MCD','PKI','MSFT','EBAY','XOM','K','WMT','GE','F','JPM','VMC'];
